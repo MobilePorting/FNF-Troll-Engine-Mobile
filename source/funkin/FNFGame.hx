@@ -6,24 +6,6 @@ import funkin.states.MusicBeatState;
 
 import flixel.util.typeLimit.NextState;
 
-#if CRASH_HANDLER
-import haxe.CallStack;
-import openfl.events.UncaughtErrorEvent;
-
-#if SAVE_CRASH_LOGS
-import sys.io.File;
-#end
-
-#if sys
-import lime.system.System;
-#end
-
-#if (windows && cpp)
-import funkin.api.Windows;
-#end
-
-#end
-
 #if SCRIPTABLE_STATES
 import funkin.states.scripting.HScriptOverridenState;
 #end
@@ -54,22 +36,7 @@ class FNFGame extends FlxGame
 		FlxG.signals.gameResized.add((w, h) -> resetSpriteCaches());
 		FlxG.signals.focusGained.add(resetSpriteCaches);
 
-		#if CRASH_HANDLER
-		openfl.Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
-			UncaughtErrorEvent.UNCAUGHT_ERROR, 
-			function(event:UncaughtErrorEvent) {
-				// one of these oughta do it
-				event.stopImmediatePropagation();
-				event.stopPropagation();
-				event.preventDefault();
-				onCrash(event.error);
-			}
-		);
-
-		#if cpp
-		untyped __global__.__hxcpp_set_critical_error_handler(onCrash);
-		#end
-		#end
+		funkin.CrashHandler.init();
 	}
 
 	override function update():Void
@@ -178,58 +145,4 @@ class FNFGame extends FlxGame
 		Globals.variables.clear();
 		super.switchState();
 	}
-
-	#if CRASH_HANDLER
-	private function onCrash(errorName:String):Void {
-		print("\nCall stack starts below");
-
-		var callstack:String = Main.callstackToString(CallStack.exceptionStack(true));
-		print('\n$callstack\n$errorName');
-
-		////
-		var boxMessage:String = '$callstack\n$errorName';
-
-		#if SAVE_CRASH_LOGS
-		final fileName:String = "crash.txt";
-		boxMessage += '\nCall stack was saved as $fileName';
-		File.saveContent(fileName, callstack);
-		#end
-
-		#if WINDOWS_CRASH_HANDLER
-		boxMessage += "\nWould you like to goto the main menu?";
-		var ret = Windows.msgBox(boxMessage, errorName, ERROR | MessageBoxOptions.YESNOCANCEL | MessageBoxDefaultButton.BUTTON3);
-		
-		switch(ret) {
-			case YES: 
-				toMainMenu();
-				return;
-			case CANCEL: 
-				// Continue with a possibly unstable state
-				return;
-			default:
-				// Close the game
-		}
-		#else
-		lime.app.Application.current.window.alert(callstack, errorName);
-		#end
-
-		#if sys 
-		System.exit(1);
-		#end
-	}
-
-	@:unreflective private function toMainMenu() {
-		try{
-			if (_state != null) {
-				_state.destroy();
-				_state = null;
-			}
-		}catch(e){
-			print("Error destroying state: ", e);
-		}	
-		
-		FlxG.game._nextState = new funkin.states.MainMenuState();
-		FlxG.game.switchState();
-	}
-	#end
 }

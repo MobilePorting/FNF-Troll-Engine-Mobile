@@ -1,158 +1,57 @@
-# This is a basic workflow to help you get started with Actions
+name: Main
 
-name: Build
+on: workflow_dispatch
 
-# Controls when the action will run. 
-on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  #push:
-  #  branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  buildWindows:
-    runs-on: windows-latest
-    
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
-
-      - uses: krdlab/setup-haxe@master
-        with:
-          haxe-version: 4.3.6
-      # Runs a set of commands using the runners shell
-      - name: Restore existing build cache for faster compilation
-        uses: actions/cache@v3
-        with:
-          # not caching the bin folder to prevent asset duplication and stuff like that
-          key: cache-build-windows
-          path: |
-            .haxelib/
-            export/release/windows/haxe/
-            export/release/windows/obj/
-          restore-keys: |
-            cache-build-windows
-      - name: Install Haxelib
-        run: |
-          haxelib install hxcpp > nul --quiet
-          haxelib install hmm --quiet
-          haxelib run hmm setup
-          haxelib run hmm install
-        shell: cmd
-      - name: Create Version Tag
-        run: echo "${{github.run_id}}" > VERSION
-      - name: Compile
-        run: haxelib run lime build windows -Dartifact
-      - name: Publish Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: windowsBuild
-          path: export/release/windows/bin
-      # Thank you codename engine I will be stealing from you in the future!!
-      # /j
-      - name: Clearing already existing cache
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const caches = await github.rest.actions.getActionsCacheList({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            })
-            for (const cache of caches.data.actions_caches) {
-              if (cache.key == "cache-build-windows") {
-                console.log('Clearing ' + cache.key + '...')
-                await github.rest.actions.deleteActionsCacheById({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  cache_id: cache.id,
-                })
-                console.log("Cache cleared.")
-              }
-            }
-      - name: Uploading new cache
-        uses: actions/cache@v3
-        with:
-          # caching again since for some reason it doesnt work with the first post cache shit
-          key: cache-build-windows
-          path: |
-            .haxelib/
-            export/release/windows/haxe/
-            export/release/windows/obj/
-          restore-keys: |
-            cache-build-windows
-  
-  buildLinux:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-${{ matrix.version }}
+  Build:
+    name: ${{ matrix.name }}
     strategy:
-      fail-fast: false
       matrix:
-        build: [release]
-        version: [20.04, 22.04]
-    timeout-minutes: 45
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
-
-      - uses: krdlab/setup-haxe@master
-        with:
-          haxe-version: 4.3.6
-      # Runs a set of commands using the runners shell
-      - name: Install Haxelib
-        run: |
-          sudo apt-get install libvlc-dev
-          sudo apt-get install libvlccore-dev
-          haxelib setup ~/haxelib
-          haxelib install hxcpp > /dev/null --quiet
-          haxelib install hmm --quiet
-          haxelib run hmm install
-      - name: Create Version Tag
-        run: echo "${{github.run_id}}" > VERSION
-      - name: Compile
-        run: haxelib run lime build Project.xml linux -Dartifact --app-version="4.0.0-${{ github.run_id}}"
-      - name: Publish Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: buildUbuntu${{ matrix.version }}-32-${{ matrix.build }}
-          path: 'export/${{ matrix.build }}/linux/bin'
-  
-  buildMac:
-    runs-on: macos-${{ matrix.version }}
-    strategy:
-      fail-fast: false
-      matrix:
-        build: [release]
-        version: [13]
-    timeout-minutes: 45
-    
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
-
-      - uses: krdlab/setup-haxe@master
-        with:
-          haxe-version: 4.3.6
-      # Runs a set of commands using the runners shell
-      - name: Install Haxelib
-        run: |
-          haxelib setup ~/haxelib
-          haxelib install hxcpp > /dev/null --quiet
-          haxelib install hmm --quiet
-          haxelib run hmm install
-      - name: Create Version Tag
-        run: echo "${{github.run_id}}" > VERSION
-      - name: Compile
-        run: haxelib run lime build mac -Dartifact --app-version="4.0.0-${{ github.run_id}}"
-      - name: Publish Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: buildMac-${{ matrix.version }}-64-${{ matrix.build }}
-          path: 'export/${{ matrix.build }}/macos/bin'
+        include:
+          - name: Windows
+            os: windows-2022
+            buildArgs: windows
+            artifactName: windowsBuild-x86_64
+            artifactPath: export\release\windows\bin\*
+          - name: Windows ARM64
+            os: windows-2022
+            buildArgs: "windows -arm64 -D HXCPP_ARM64"
+            artifactName: windowsBuild-arm64
+            artifactPath: export\release\windows\bin\*
+          - name: Linux
+            os: ubuntu-22.04
+            buildArgs: linux
+            artifactName: linuxBuild-x86_64
+            artifactPath: export/release/linux/bin/*
+          - name: Linux ARM64
+            os: ubuntu-22.04-arm
+            buildArgs: linux
+            artifactName: linuxBuild-arm64
+            artifactPath: export/release/linux/bin/*
+          - name: macOS x86_64
+            os: macos-14
+            buildArgs: "mac -64 -D HXCPP_M64"
+            artifactName: macOSBuild-x86_64
+            artifactPath: export/release/macos/bin/*
+          - name: macOS AArch64
+            os: macos-15
+            buildArgs: mac
+            artifactName: macOSBuild-arm64
+            artifactPath: export/release/macos/bin/*
+          - name: Android
+            os: macos-15
+            buildArgs: "android -ONLY_ARMV7"
+            artifactName: androidBuild
+            artifactPath: "export/release/android/bin/app/build/outputs/apk/release/*.apk"
+          - name: iOS
+            os: macos-15
+            buildArgs: "ios -nosign"
+            artifactName: iOSBuild
+            artifactPath: "export/release/ios/build/Release-iphoneos/*.ipa"
+    uses: ./.github/workflows/build.yml
+    with:
+        name: ${{ matrix.name }}
+        os: ${{ matrix.os }}
+        buildArgs: ${{ matrix.buildArgs }}
+        artifactName: ${{ matrix.artifactName }}
+        artifactPath: ${{ matrix.artifactPath }}

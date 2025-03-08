@@ -2,18 +2,24 @@
 	"dependencies": [
 		{
 			"name": "openfl",
-			"type": "haxelib",
-			"version": "9.2.2"
+			"type": "git",
+			"dir": null,
+			"ref": "9.2.2",
+			"url": "https://github.com/MobilePorting/openfl"
 		},
 		{
 			"name": "lime",
-			"type": "haxelib",
-			"version": "8.1.2"
+			"type": "git",
+			"dir": null,
+			"ref": "main",
+			"url": "https://github.com/MobilePorting/lime"
 		},
 		{
 			"name": "flixel",
-			"type": "haxelib",
-			"version": "5.6.2"
+			"type": "git",
+			"dir": null,
+			"ref": "5.6.2",
+			"url": "https://github.com/MobilePorting/flixel"
 		},
 		{
 			"name": "flixel-ui",
@@ -27,8 +33,10 @@
 		},
 		{
 			"name": "hxcpp",
-			"type": "haxelib",
-			"version": null
+			"type": "git",
+			"dir": null,
+			"ref": "master",
+			"url": "https://github.com/MobilePorting/hxcpp"
 		},
 		{
 			"name": "hxcpp-debug-server",
@@ -44,8 +52,10 @@
 		},
 		{
 			"name": "hxvlc",
-			"type": "haxelib",
-			"version": "1.6.1"
+			"type": "git",
+			"dir": null,
+			"ref": "main",
+			"url": "https://github.com/MobilePorting/hxvlc"
 		},
 		{
 			"name": "flxanimate",
@@ -54,15 +64,17 @@
 		},
 		{
 			"name": "hxdiscord_rpc",
-			"type": "haxelib",
-			"version": "1.1.1"
+			"type": "git",
+			"dir": null,
+			"ref": "main",
+			"url": "https://github.com/MobilePorting/hxdiscord_rpc"
 		},
 		{
 			"name": "linc_luajit",
 			"type": "git",
 			"dir": null,
 			"ref": "master",
-			"url": "https://github.com/riconuts/linc_luajit"
+			"url": "https://github.com/MobilePorting/linc_luajit-te"
 		},
 		{
 			"name": "moonchart",

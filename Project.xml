@@ -49,8 +49,8 @@
     <classpath path="source" />
 
 	<section if="desktop">
-		<assets path="alsoft.txt" rename="alsoft.ini" if="windows" />
-		<assets path="alsoft.txt" rename="alsoft.conf" unless="windows" />
+		<assets path="alsoft.txt" rename="plugins/alsoft.ini" type="text" if="windows"/>
+		<assets path="alsoft.txt" rename="plugins/alsoft.conf" type="text" unless="windows"/>
 	</section>
 
 	<assets path="art/iconOG.png" rename="icon.png" if="linux" />
@@ -66,7 +66,6 @@
     <define name="DISCORD_ALLOWED" if="desktop cpp" unless="display || artifact" />
     <!--<define name="MULTICORE_LOADING" if="native" />-->
 	<!--I don't recommend turning on MULTICORE_LOADING until we rewrite it to be less crashy -Neb-->
-    <define name="CRASH_HANDLER" />
     <define name="BREAD_ALLOWED" />
 
 	<!--Remove if you dont want states to be modified with scripts. This only disables extension/overrides and not the HScriptedState class-->
@@ -93,11 +92,6 @@
 	<!--Anything marked as deprecated should be removed after a major or minor version but not after patches. (major.minor.patch)-->
     <define name="ALLOW_DEPRECATION" unless="final"/>
 
-	<!--Remove if you don't want options for the game to continue running after a crash -->
-	<define name="WINDOWS_CRASH_HANDLER" if="windows cpp" />
-	<!--Remove if you don't want crash logs to be saved-->
-	<define name="SAVE_CRASH_LOGS" if="CRASH_HANDLER native" />
-
 	<haxedef name="traceShaderLineNumbers"/>
 
     <icon path="art/iconOG.png" />
@@ -107,7 +101,7 @@
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
-	<haxelib name="flixel" version="5.6.2" />
+	<haxelib name="flixel" />
 	<haxelib name="flixel-ui" version="2.6.1" />
 	<haxelib name="flixel-addons" version="3.2.3" />
 
@@ -120,7 +114,7 @@
 	<haxelib name="moonchart" version="git" if="USING_NEW_MOONCHART"/>
 
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
-	<haxelib name="hxvlc" version="1.6.1" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
+	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 
 	<section if="HSCRIPT_ALLOWED">
@@ -140,12 +134,10 @@
 		
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
-	<section if="CRASH_HANDLER">
-		<haxedef name="HXCPP_STACK_TRACE" />
-		<haxedef name="HXCPP_CHECK_POINTER" />
-		<haxedef name="HXCPP_STACK_LINE" />
-		<haxedef name="openfl-enable-handle-error" />
-	</section>
+	<haxedef name="HXCPP_STACK_TRACE" />
+	<haxedef name="HXCPP_CHECK_POINTER" />
+	<haxedef name="HXCPP_STACK_LINE" />
+	<haxedef name="HXCPP_CATCH_SEGV" />
 
 	<!-- NOTE TO SELF: DISABLE THIS IF ISSUES ARE FOUND -->
 	<haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB" if="LUA_ALLOWED" /> <!-- stable luas PUT AFTER FIRST LINE WITH APP NAME AND ETC -->

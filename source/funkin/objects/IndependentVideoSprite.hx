@@ -32,7 +32,9 @@ class IndependentVideoSprite extends VideoSprite {
 	// TODO: add some basic easy signals
 	// public var isLooping:Bool = false;
 	
+	#if (hxvlc < "1.9.5" || hxCodec)
 	var _paused:Bool = false;
+	#end
 
 	public function new(x:Float = 0, y:Float = 0, destroy:Bool = true, addToState:Bool = false) {
 		#if(hxvlc)
@@ -118,6 +120,7 @@ class IndependentVideoSprite extends VideoSprite {
 	}
 	#end
 
+	#if (hxvlc < "1.9.5" || hxCodec)
 	override function pause(){
 		_paused = true;
 		super.pause();
@@ -127,22 +130,25 @@ class IndependentVideoSprite extends VideoSprite {
 		_paused = false;
 		super.resume();
 	}
+	#end
 
 	function _autoPause(){
-		if(!autoPause)
+		if(!FlxG.autoPause)
 			return;
 
 		if (bitmap != null)
 			bitmap.pause();
 	}
 	function _autoResume() {
-		if (!autoPause)
+		if (!FlxG.autoPause)
 			return;
 
+		#if (hxvlc < "1.9.5" || hxCodec)
 		if(!_paused){
 			if (bitmap != null)
 				bitmap.resume();
 		}
+		#end
 	}
 }
 #end

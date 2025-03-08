@@ -290,4 +290,13 @@ class CoolUtil {
 
 	inline public static function rotate(x:Float, y:Float, rads:Float, ?point:FlxPoint):FlxPoint
 		return CoolMath.rotate(x, y, rads, point);
+
+	public static function showPopUp(message:String, title:String):Void
+	{
+		/*#if android
+		AndroidTools.showAlertDialog(title, message, {name: "OK", func: null}, null);
+		#else*/
+		FlxG.stage.window.alert(message, title);
+		//#end
+	}
 }
