@@ -58,7 +58,7 @@ jobs:
         artifactPath: ${{ matrix.artifactPath }}
 
   Releaser:
-    needs: [build]
+    needs: [get-commit-hash, build]
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
@@ -83,9 +83,9 @@ jobs:
       - name: Publish The Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "0.7.3"
-          tag_name: "0.7.3"
-          prerelease: false
+          name: "DevBuild ${{ needs.get-commit-hash.outputs.commit_hash }}"
+          tag_name: "devbuild-${{ needs.get-commit-hash.outputs.commit_hash }}"
+          prerelease: true
           files: |
             /home/runner/*.apk
             /home/runner/*.zip
